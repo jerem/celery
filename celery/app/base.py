@@ -11,6 +11,7 @@ Application Base Class.
 from __future__ import absolute_import
 from __future__ import with_statement
 
+import os
 import platform as _platform
 import sys
 
@@ -51,7 +52,7 @@ def pyimplementation():
 
 
 class LamportClock(object):
-    """Lamports logical clock.
+    """Lamport's logical clock.
 
     From Wikipedia:
 
@@ -80,7 +81,7 @@ class LamportClock(object):
 
     When sending a message use :meth:`forward` to increment the clock,
     when receiving a message use :meth:`adjust` to sync with
-    the timestamp of the incoming message.
+    the time stamp of the incoming message.
 
     """
     #: The clocks current value.
@@ -119,6 +120,13 @@ class Settings(datastructures.ConfigurationView):
     def BROKER_BACKEND(self):
         """Deprecated compat alias to :attr:`BROKER_TRANSPORT`."""
         return self.BROKER_TRANSPORT
+
+    @property
+    def BROKER_HOST(self):
+
+        return (os.environ.get("CELERY_BROKER_URL") or
+                self.get("BROKER_URL") or
+                self.get("BROKER_HOST"))
 
 
 class BaseApp(object):
@@ -382,7 +390,7 @@ class BaseApp(object):
 
     @cached_property
     def backend(self):
-        """Storing/retreiving task state.  See
+        """Storing/retrieving task state.  See
         :class:`~celery.backend.base.BaseBackend`."""
         return self._get_backend()
 
