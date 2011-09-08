@@ -42,11 +42,9 @@ Registering the click is done as follows:
 from itertools import count
 from Queue import Queue
 
-from kombu.utils import cached_property
-
 from celery.datastructures import consume_queue
 from celery.task import Task
-from celery.utils import timer2
+from celery.utils import cached_property, timer2
 from celery.worker import state
 
 
@@ -56,7 +54,7 @@ def apply_batches_task(task, args, loglevel, logfile):
         result = task(*args)
     except Exception, exp:
         result = None
-        task.logger.error("There was an Exception: %s" % exp)
+        task.logger.error("There was an Exception: %s", exp, exc_info=True)
     finally:
         task.request.clear()
     return result
@@ -167,7 +165,7 @@ class Batches(Task):
                     callback=acks_late[True] and on_return or None)
 
     def debug(self, msg):
-        self.logger.debug("%s: %s" % (self.name, msg))
+        self.logger.debug("%s: %s", self.name, msg)
 
     @cached_property
     def logger(self):

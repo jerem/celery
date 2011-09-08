@@ -3,11 +3,10 @@ from __future__ import absolute_import
 import sys
 import traceback
 
-from celery import states
-from celery import signals
-from celery.registry import tasks
-from celery.exceptions import RetryTaskError
-from celery.datastructures import ExceptionInfo
+from .. import states, signals
+from ..datastructures import ExceptionInfo
+from ..exceptions import RetryTaskError
+from ..registry import tasks
 
 
 class TraceInfo(object):
@@ -72,7 +71,7 @@ class TaskTrace(object):
 
     def execute(self):
         self.task.request.update(self.request, args=self.args,
-                                               kwargs=self.kwargs)
+                                 called_directly=False, kwargs=self.kwargs)
         signals.task_prerun.send(sender=self.task, task_id=self.task_id,
                                  task=self.task, args=self.args,
                                  kwargs=self.kwargs)

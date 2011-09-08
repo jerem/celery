@@ -18,9 +18,12 @@ from itertools import islice
 from pprint import pprint
 
 from kombu.utils import cached_property, gen_unique_id  # noqa
+uuid = gen_unique_id
 
-from celery.utils.compat import StringIO
-from celery.utils.encoding import safe_repr as _safe_repr
+from ..exceptions import CPendingDeprecationWarning, CDeprecationWarning
+
+from .compat import StringIO
+from .encoding import safe_repr as _safe_repr
 
 LOG_LEVELS = dict(logging._levelNames)
 LOG_LEVELS["FATAL"] = logging.FATAL
@@ -38,6 +41,18 @@ DEPRECATION_FMT = """
 """
 
 
+def warn_deprecated(description=None, deprecation=None, removal=None,
+        alternative=None):
+    ctx = {"description": description,
+           "deprecation": deprecation, "removal": removal,
+           "alternative": alternative}
+    if deprecation is not None:
+        w = CPendingDeprecationWarning(PENDING_DEPRECATION_FMT % ctx)
+    else:
+        w = CDeprecationWarning(DEPRECATION_FMT % ctx)
+    warnings.warn(w)
+
+
 def deprecated(description=None, deprecation=None, removal=None,
         alternative=None):
 
@@ -45,14 +60,10 @@ def deprecated(description=None, deprecation=None, removal=None,
 
         @wraps(fun)
         def __inner(*args, **kwargs):
-            ctx = {"description": description or get_full_cls_name(fun),
-                   "deprecation": deprecation, "removal": removal,
-                   "alternative": alternative}
-            if deprecation is not None:
-                w = PendingDeprecationWarning(PENDING_DEPRECATION_FMT % ctx)
-            else:
-                w = DeprecationWarning(DEPRECATION_FMT % ctx)
-            warnings.warn(w)
+            warn_deprecated(description=description or get_full_cls_name(fun),
+                            deprecation=deprecation,
+                            removal=removal,
+                            alternative=alternative)
             return fun(*args, **kwargs)
         return __inner
     return _inner

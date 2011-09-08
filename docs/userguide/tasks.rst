@@ -67,6 +67,8 @@ attributes:
 
 :loglevel: The current log level used.
 
+:hostname: Hostname of the worker instance executing the task.
+
 :delivery_info: Additional message delivery information. This is a mapping
                 containing the exchange and routing key used to deliver this
                 task.  Used by e.g. :meth:`~celery.task.base.BaseTask.retry`
@@ -722,7 +724,7 @@ base class for new task types.
 
 .. code-block:: python
 
-    class DebugTask(object):
+    class DebugTask(Task):
         abstract = True
 
         def after_return(self, \*args, \*\*kwargs):

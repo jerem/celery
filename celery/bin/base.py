@@ -1,9 +1,18 @@
+from __future__ import absolute_import
+
 import os
 import sys
+import warnings
 
 from optparse import OptionParser, make_option as Option
 
-import celery
+from .. import __version__, Celery
+from ..exceptions import CDeprecationWarning, CPendingDeprecationWarning
+
+
+# always enable DeprecationWarnings, so our users can see them.
+for warning in (CDeprecationWarning, CPendingDeprecationWarning):
+    warnings.simplefilter("once", warning, 0)
 
 
 class Command(object):
@@ -18,7 +27,7 @@ class Command(object):
     args = ''
 
     #: Application version.
-    version = celery.__version__
+    version = __version__
 
     #: If false the parser will raise an exception if positional
     #: args are provided.
@@ -145,7 +154,7 @@ class Command(object):
         return argv
 
     def get_cls_by_name(self, name):
-        from celery.utils import get_cls_by_name, import_from_cwd
+        from ..utils import get_cls_by_name, import_from_cwd
         return get_cls_by_name(name, imp=import_from_cwd)
 
     def process_cmdline_config(self, argv):
@@ -181,7 +190,7 @@ class Command(object):
         return acc
 
     def _get_default_app(self, *args, **kwargs):
-        return celery.Celery(*args, **kwargs)
+        return Celery(*args, **kwargs)
 
 
 def daemon_options(default_pidfile, default_logfile=None):

@@ -39,8 +39,6 @@ It should contain all you need to run a basic Celery set-up.
     ## number of CPUs on your machine. If not set, the number of CPUs/cores
     ## available will be used.
     CELERYD_CONCURRENCY = 10
-    # CELERYD_LOG_FILE = "celeryd.log"
-    # CELERYD_LOG_LEVEL = "INFO"
 
 
 Configuration Directives
@@ -124,6 +122,14 @@ Can be one of the following:
 .. _`Redis`: http://code.google.com/p/redis/
 .. _`Tokyo Tyrant`: http://1978th.net/tokyotyrant/
 
+.. setting:: CELERY_RESULT_SERIALIZER
+
+CELERY_RESULT_SERIALIZER
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Result message serialization format.  Default is `"pickle"`. See
+:ref:`executing-serializers`.
+
 .. _conf-database-result-backend:
 
 Database backend settings
@@ -196,25 +202,13 @@ Example configuration
 AMQP backend settings
 ---------------------
 
-.. setting:: CELERY_AMQP_TASK_RESULT_EXPIRES
-
-CELERY_AMQP_TASK_RESULT_EXPIRES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The time in seconds of which the task result queues should expire.
-
 .. note::
 
-    AMQP result expiration requires RabbitMQ versions 2.1.0 and higher.
+    The AMQP backend requires RabbitMQ 1.1.0 or higher to automatically
+    expire results.  If you are running an older version of RabbitmQ
+    you should disable result expiration like this:
 
-.. setting:: CELERY_AMQP_TASK_RESULT_CONNECTION_MAX
-
-CELERY_AMQP_TASK_RESULT_CONNECTION_MAX
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Maximum number of connections used by the AMQP result backend simultaneously.
-
-Default is 1 (a single connection per process).
+        CELERY_TASK_RESULT_EXPIRES = None
 
 .. setting:: CELERY_RESULT_EXCHANGE
 
@@ -230,14 +224,6 @@ CELERY_RESULT_EXCHANGE_TYPE
 
 The exchange type of the result exchange.  Default is to use a `direct`
 exchange.
-
-.. setting:: CELERY_RESULT_SERIALIZER
-
-CELERY_RESULT_SERIALIZER
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Result message serialization format.  Default is `"pickle"`. See
-:ref:`executing-serializers`.
 
 .. setting:: CELERY_RESULT_PERSISTENT
 
@@ -729,13 +715,11 @@ A built-in periodic task will delete the results after this time
 
 .. note::
 
-    For the moment this only works with the database, cache, redis and MongoDB
-    backends. For the AMQP backend see
-    :setting:`CELERY_AMQP_TASK_RESULT_EXPIRES`.
+    For the moment this only works with the amqp, database, cache, redis and MongoDB
+    backends.
 
     When using the database or MongoDB backends, `celerybeat` must be
     running for the results to be expired.
-
 
 .. setting:: CELERY_MAX_CACHED_RESULTS
 
@@ -967,13 +951,6 @@ The default value for the `Task.send_error_emails` attribute, which if
 set to :const:`True` means errors occurring during task execution will be
 sent to :setting:`ADMINS` by email.
 
-.. setting:: CELERY_TASK_ERROR_WHITELIST
-
-CELERY_TASK_ERROR_WHITELIST
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A white list of exceptions to send error emails for.
-
 .. setting:: ADMINS
 
 ADMINS
@@ -1025,6 +1002,13 @@ EMAIL_USE_SSL
 ~~~~~~~~~~~~~
 
 Use SSL when connecting to the SMTP server.  Disabled by default.
+
+.. setting:: EMAIL_USE_TLS
+
+EMAIL_USE_TLS
+~~~~~~~~~~~~~
+
+Use TLS when connecting to the SMTP server.  Disabled by default.
 
 .. setting:: EMAIL_TIMEOUT
 
@@ -1150,29 +1134,6 @@ this behavior.
 
     Logging can also be customized by connecting to the
     :signal:`celery.signals.setup_logging` signal.
-
-.. setting:: CELERYD_LOG_FILE
-
-CELERYD_LOG_FILE
-~~~~~~~~~~~~~~~~
-
-The default file name the worker daemon logs messages to.  Can be overridden
-using the :option:`--logfile` option to :mod:`~celery.bin.celeryd`.
-
-The default is :const:`None` (`stderr`)
-
-.. setting:: CELERYD_LOG_LEVEL
-
-CELERYD_LOG_LEVEL
-~~~~~~~~~~~~~~~~~
-
-Worker log level, can be one of :const:`DEBUG`, :const:`INFO`, :const:`WARNING`,
-:const:`ERROR` or :const:`CRITICAL`.
-
-Can also be set via the :option:`--loglevel` argument to
-:mod:`~celery.bin.celeryd`.
-
-See the :mod:`logging` module for more information.
 
 .. setting:: CELERYD_LOG_COLOR
 
@@ -1333,53 +1294,12 @@ CELERYBEAT_MAX_LOOP_INTERVAL
 The maximum number of seconds :mod:`~celery.bin.celerybeat` can sleep
 between checking the schedule.  Default is 300 seconds (5 minutes).
 
-.. setting:: CELERYBEAT_LOG_FILE
-
-CELERYBEAT_LOG_FILE
-~~~~~~~~~~~~~~~~~~~
-
-The default file name to log messages to.  Can be overridden using
-the `--logfile` option to :mod:`~celery.bin.celerybeat`.
-
-The default is :const:`None` (`stderr`).
-
-.. setting:: CELERYBEAT_LOG_LEVEL
-
-CELERYBEAT_LOG_LEVEL
-~~~~~~~~~~~~~~~~~~~~
-
-Logging level. Can be any of :const:`DEBUG`, :const:`INFO`, :const:`WARNING`,
-:const:`ERROR`, or :const:`CRITICAL`.
-
-Can also be set via the :option:`--loglevel` argument to
-:mod:`~celery.bin.celerybeat`.
-
-See the :mod:`logging` module for more information.
 
 .. _conf-celerymon:
 
 Monitor Server: celerymon
 -------------------------
 
-.. setting:: CELERYMON_LOG_FILE
-
-CELERYMON_LOG_FILE
-~~~~~~~~~~~~~~~~~~
-
-The default file name to log messages to.  Can be overridden using
-the :option:`--logfile` argument to `celerymon`.
-
-The default is :const:`None` (`stderr`)
-
-.. setting:: CELERYMON_LOG_LEVEL
-
-CELERYMON_LOG_LEVEL
-~~~~~~~~~~~~~~~~~~~
-
-Logging level. Can be any of :const:`DEBUG`, :const:`INFO`, :const:`WARNING`,
-:const:`ERROR`, or :const:`CRITICAL`.
-
-See the :mod:`logging` module for more information.
 
 .. setting:: CELERYMON_LOG_FORMAT
 
@@ -1392,3 +1312,135 @@ Default is `[%(asctime)s: %(levelname)s/%(processName)s] %(message)s`
 
 See the Python :mod:`logging` module for more information about log
 formats.
+
+.. _conf-deprecated:
+
+Deprecated Settings
+-------------------
+
+These settings have been deprecated and should no longer used,
+as they will be removed in future versions.
+
+.. setting:: CELERY_AMQP_TASK_RESULT_EXPIRES
+
+CELERY_AMQP_TASK_RESULT_EXPIRES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 2.5
+
+The time in seconds of which the task result queues should expire.
+
+This setting is deprecated, and will be removed in version 3.0.
+Please use :setting:`CELERY_TASK_RESULT_EXPIRES` instead.
+
+.. note::
+
+    AMQP result expiration requires RabbitMQ versions 2.1.0 and higher.
+
+.. setting:: CELERY_TASK_ERROR_WHITELIST
+
+CELERY_TASK_ERROR_WHITELIST
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 2.5
+
+A white list of exceptions to send error emails for.
+
+This option is pending deprecation and is scheduled for removal
+in version 3.0.
+
+.. setting:: CELERYD_LOG_FILE
+
+CELERYD_LOG_FILE
+~~~~~~~~~~~~~~~~
+
+.. deprecated:: 2.4
+
+This option is deprecated and is scheduled for removal in version 3.0.
+Please use the :option:`--logfile` argument instead.
+
+The default file name the worker daemon logs messages to.  Can be overridden
+using the :option:`--logfile` option to :mod:`~celery.bin.celeryd`.
+
+The default is :const:`None` (`stderr`)
+
+.. setting:: CELERYD_LOG_LEVEL
+
+CELERYD_LOG_LEVEL
+~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 2.4
+
+This option is deprecated and is scheduled for removal in version 3.0.
+Please use the :option:`--loglevel` argument instead.
+
+Worker log level, can be one of :const:`DEBUG`, :const:`INFO`, :const:`WARNING`,
+:const:`ERROR` or :const:`CRITICAL`.
+
+Can also be set via the :option:`--loglevel` argument to
+:mod:`~celery.bin.celeryd`.
+
+See the :mod:`logging` module for more information.
+
+.. setting:: CELERYBEAT_LOG_FILE
+
+CELERYBEAT_LOG_FILE
+~~~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 2.4
+
+This option is deprecated and is scheduled for removal in version 3.0.
+Please use the :option:`--logfile` argument instead.
+
+The default file name to log messages to.  Can be overridden using
+the `--logfile` option to :mod:`~celery.bin.celerybeat`.
+
+The default is :const:`None` (`stderr`).
+
+.. setting:: CELERYBEAT_LOG_LEVEL
+
+CELERYBEAT_LOG_LEVEL
+~~~~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 2.4
+
+This option is deprecated and is scheduled for removal in version 3.0.
+Please use the :option:`--loglevel` argument instead.
+
+Logging level. Can be any of :const:`DEBUG`, :const:`INFO`, :const:`WARNING`,
+:const:`ERROR`, or :const:`CRITICAL`.
+
+Can also be set via the :option:`--loglevel` argument to
+:mod:`~celery.bin.celerybeat`.
+
+See the :mod:`logging` module for more information.
+
+.. setting:: CELERYMON_LOG_FILE
+
+CELERYMON_LOG_FILE
+~~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 2.4
+
+This option is deprecated and is scheduled for removal in version 3.0.
+Please use the :option:`--logfile` argument instead.
+
+The default file name to log messages to.  Can be overridden using
+the :option:`--logfile` argument to `celerymon`.
+
+The default is :const:`None` (`stderr`)
+
+.. setting:: CELERYMON_LOG_LEVEL
+
+CELERYMON_LOG_LEVEL
+~~~~~~~~~~~~~~~~~~~
+
+.. deprecated:: 2.4
+
+This option is deprecated and is scheduled for removal in version 3.0.
+Please use the :option:`--loglevel` argument instead.
+
+Logging level. Can be any of :const:`DEBUG`, :const:`INFO`, :const:`WARNING`,
+:const:`ERROR`, or :const:`CRITICAL`.
+
+See the :mod:`logging` module for more information.

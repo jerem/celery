@@ -6,9 +6,9 @@ import heapq
 
 from threading import Lock
 
-from celery import states
-from celery.datastructures import AttributeDict, LocalCache
-from celery.utils import kwdict
+from .. import states
+from ..datastructures import AttributeDict, LRUCache
+from ..utils import kwdict
 
 #: Hartbeat expiry time in seconds.  The worker will be considered offline
 #: if no heartbeat is received within this time.
@@ -173,8 +173,8 @@ class State(object):
 
     def __init__(self, callback=None,
             max_workers_in_memory=5000, max_tasks_in_memory=10000):
-        self.workers = LocalCache(max_workers_in_memory)
-        self.tasks = LocalCache(max_tasks_in_memory)
+        self.workers = LRUCache(limit=max_workers_in_memory)
+        self.tasks = LRUCache(limit=max_tasks_in_memory)
         self.event_callback = callback
         self.group_handlers = {"worker": self.worker_event,
                                "task": self.task_event}

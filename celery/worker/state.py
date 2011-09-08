@@ -1,13 +1,14 @@
+from __future__ import absolute_import
+
 import os
 import platform
 import shelve
 
 from collections import defaultdict
 
-from kombu.utils import cached_property
-
-from celery import __version__
-from celery.datastructures import LimitedSet
+from .. import __version__
+from ..datastructures import LimitedSet
+from ..utils import cached_property
 
 #: Worker software/platform information.
 SOFTWARE_INFO = {"sw_ident": "celeryd",

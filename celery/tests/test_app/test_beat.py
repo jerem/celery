@@ -10,7 +10,7 @@ from celery import registry
 from celery.result import AsyncResult
 from celery.schedules import schedule
 from celery.task.base import Task
-from celery.utils import gen_unique_id
+from celery.utils import uuid
 
 
 class Object(object):
@@ -104,7 +104,7 @@ class MockLogger(logging.Logger):
         logging.Logger.__init__(self, *args, **kwargs)
 
     def _log(self, level, msg, args, **kwargs):
-        self.logged.append((level, msg))
+        self.logged.append((level, msg, args, kwargs))
 
 
 class mScheduler(beat.Scheduler):
@@ -119,7 +119,7 @@ class mScheduler(beat.Scheduler):
                           "args": args,
                           "kwargs": kwargs,
                           "options": options})
-        return AsyncResult(gen_unique_id())
+        return AsyncResult(uuid())
 
 
 class mSchedulerSchedulingError(mScheduler):
@@ -189,9 +189,9 @@ class test_Scheduler(unittest.TestCase):
                       schedule=always_due)
         self.assertEqual(scheduler.tick(), 1)
         self.assertTrue(scheduler.logger.logged[0])
-        level, msg = scheduler.logger.logged[0]
+        level, msg, args, kwargs = scheduler.logger.logged[0]
         self.assertEqual(level, logging.ERROR)
-        self.assertIn("Couldn't apply scheduled task", msg)
+        self.assertIn("Couldn't apply scheduled task", args[0].message)
 
     def test_due_tick_RuntimeError(self):
         scheduler = mSchedulerRuntimeError()

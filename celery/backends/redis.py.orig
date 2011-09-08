@@ -96,6 +96,12 @@ class RedisBackend(KeyValueStoreBackend):
 
     @cached_property
     def client(self):
+<<<<<<< HEAD
+        pool = self.redis.ConnectionPool(host=self.host, port=self.port,
+                                db=self.db, password=self.password,
+                                max_connections=self.max_connections)
+        return self.redis.Redis(connection_pool=pool)
+=======
         return self.redis.Redis(host=self.host, port=self.port,
                                 db=self.db, password=self.password)
 
@@ -107,3 +113,4 @@ class RedisBackend(KeyValueStoreBackend):
                  password=self.password,
                  expires=self.expires))
         return super(RedisBackend, self).__reduce__(args, kwargs)
+>>>>>>> upstream/master

@@ -3,7 +3,7 @@ from __future__ import with_statement
 
 from kombu.pidbox import Mailbox
 
-from celery.app import app_or_default
+from ..app import app_or_default
 
 
 def flatten_reply(reply):
@@ -209,9 +209,7 @@ class Control(object):
         """
         with self.app.default_connection(connection, connect_timeout) as conn:
             if channel is None:
-                if not getattr(conn, "_producer_chan", None):
-                    conn._producer_chan = conn.channel()
-                channel = conn._producer_chan
+                channel = conn.default_channel
             return self.mailbox(conn)._broadcast(command, arguments,
                                                  destination, reply, timeout,
                                                  limit, callback,

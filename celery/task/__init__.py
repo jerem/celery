@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+
 import warnings
 
-from celery.app import app_or_default
-from celery.task.base import Task, PeriodicTask
-from celery.task.sets import TaskSet, subtask
-from celery.task.chords import chord
-from celery.task.control import discard_all
+from ..app import app_or_default
+from ..exceptions import CDeprecationWarning
+
+from .base import Task, PeriodicTask
+from .sets import TaskSet, subtask
+from .chords import chord
+from .control import discard_all
 
 __all__ = ["Task", "TaskSet", "PeriodicTask", "subtask",
            "discard_all", "chord"]
@@ -95,7 +99,7 @@ def ping():  # ✞
     Please use :meth:`celery.task.control.ping` instead.
 
     """
-    warnings.warn(DeprecationWarning(
+    warnings.warn(CDeprecationWarning(
         "The ping task has been deprecated and will be removed in Celery "
         "v2.3.  Please use inspect.ping instead."))
     return PingTask.apply_async().get()
