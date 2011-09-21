@@ -96,8 +96,10 @@ class RedisBackend(KeyValueStoreBackend):
 
     @cached_property
     def client(self):
-        return self.redis.Redis(host=self.host, port=self.port,
-                                db=self.db, password=self.password)
+        pool = self.redis.ConnectionPool(host=self.host, port=self.port,
+                                         db=self.db, password=self.password,
+                                         max_connections=self.max_connections)
+        return self.redis.Redis(connection_pool=pool)
 
     def __reduce__(self, args=(), kwargs={}):
         kwargs.update(
@@ -105,5 +107,6 @@ class RedisBackend(KeyValueStoreBackend):
                  port=self.port,
                  db=self.db,
                  password=self.password,
-                 expires=self.expires))
+                 expires=self.expires,
+                 max_connections=self.max_connections))
         return super(RedisBackend, self).__reduce__(args, kwargs)
