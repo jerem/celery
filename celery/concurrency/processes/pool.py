@@ -5,6 +5,7 @@
 #
 # Copyright (c) 2007-2008, R Oudkerk --- see COPYING.txt
 #
+from __future__ import absolute_import
 
 __all__ = ['Pool']
 
@@ -595,7 +596,7 @@ class Pool(object):
                 try:
                     raise WorkerLostError("Worker exited prematurely.")
                 except WorkerLostError:
-                    exc_info = sys.exc_info()
+                    exc_info = ExceptionInfo(sys.exc_info())
                 job._set(None, (False, exc_info))
 
         if shutdown and not len(self._pool):

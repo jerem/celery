@@ -1,15 +1,26 @@
-from __future__ import absolute_import, with_statement
+"""
+
+celery.utils.functional
+=======================
+
+Functional utilities.
+
+"""
+from __future__ import absolute_import
+from __future__ import with_statement
 
 from functools import wraps
 from threading import Lock
 
 try:
     from collections import Sequence
-except ImportError:  # noqa
+except ImportError:
     # <= Py2.5
-    Sequence = (list, tuple)
+    Sequence = (list, tuple)  # noqa
 
 from celery.datastructures import LRUCache
+
+__all__ = ["maybe_list", "memoize"]
 
 KEYWORD_MARK = object()
 

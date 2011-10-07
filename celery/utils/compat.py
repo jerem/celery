@@ -1,3 +1,13 @@
+"""
+celery.utils.compat
+===================
+
+Backward compatible implementations of features
+only available in later Python versions.
+
+"""
+from __future__ import absolute_import
+
 ############## py3k #########################################################
 import sys
 
